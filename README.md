@@ -1,0 +1,1 @@
+embry0_class
