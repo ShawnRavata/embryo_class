@@ -11,6 +11,7 @@ class simulation:
         self.values = values
         self.num_values_emitted = 0
 
+    # Simulating arduino output
     def read_value(self):
         time.sleep(.001)
         if (self.num_values_emitted < len(self.values[0])):
@@ -19,14 +20,14 @@ class simulation:
         else:
             return []
 #well classes
-class all_wells:
-    def __init__(self):
-        self.dict = {}
-    def well_dictionary(self, list):
-        self.dict = {
-        for x in range(len(list)):
-            x: str(list[x])
-    }
+# class all_wells:
+#     def __init__(self):
+#         self.dict = {}
+#     def well_dictionary(self, list):
+#         self.dict = {
+#         for x in range(len(list)):
+#             x: str(list[x])
+#     }
 class well:
 
     def __init__(self):
@@ -49,6 +50,7 @@ class well:
         self.impedance_buffered_values = self.impedance_buffered_values[1:]
         self.impedance_buffered_values.append(argument_value)
         self.impedance_count += 1
+        print(self.impedance_buffered_values)
         if(np.absolute(self.impedance_buffered_values[-1] - self.impedance_buffered_values[0]) > 75):
             self.average_first = sum(self.impedance_buffered_values)/len(self.impedance_buffered_values)
             print("first average", self.average_first)
@@ -57,7 +59,9 @@ class well:
         if self.embryo_monitoring_bool == True:
             self.embryo_reading_counter += 1
         if(self.embryo_reading_counter == 4):
-            self.average_second =  sum(self.impedance_buffered_values) / len(self.impedance_buffered_values)
+            print(self.impedance_buffered_values)
+            print(len(self.impedance_buffered_values))
+            self.average_second = sum(self.impedance_buffered_values) / len(self.impedance_buffered_values)
             print("second average", self.average_second)
             print("average difference", np.absolute(self.average_second - self.average_first))
             print("time", spreadsheet["TIME"][self.count])
@@ -75,7 +79,7 @@ class well:
         self.impedance_buffered_values = []
 
 
-spreadsheet = pd.read_csv("data_in.csv")
+spreadsheet = pd.read_csv("data_in2.csv")
 
 impedance_list = list(filter(lambda name: 'IMPEDANCE' in name, list(spreadsheet)))
 print(impedance_list)
@@ -85,5 +89,5 @@ impedance_test = well()
 
 while True:
     current_line = serial_impedance.read_value()
-    impedance_test.assign_value(current_line[6])
+    impedance_test.assign_value(current_line[0])
     impedance_test.count += 1
