@@ -43,37 +43,40 @@ class well:
         self.count = 2
 
     def assign_value(self, argument_value):
-        self.impedance_current_value = argument_value
-        if len(self.impedance_buffered_values) < self.buffer_size:
+        #This filters the data for when air is in the lines, need to come up with some better filter check for air
+        #at a later date
+        if(argument_value < 100000 and argument_value != 0):
+            #pass in the current impedance and create a buffer of size 5 of the most recent impedance values
+            self.impedance_current_value = argument_value
+            if len(self.impedance_buffered_values) < self.buffer_size:
+                self.impedance_buffered_values.append(argument_value)
+                self.impedance_count += 1
+            self.impedance_buffered_values = self.impedance_buffered_values[1:]
             self.impedance_buffered_values.append(argument_value)
             self.impedance_count += 1
-        self.impedance_buffered_values = self.impedance_buffered_values[1:]
-        self.impedance_buffered_values.append(argument_value)
-        self.impedance_count += 1
-        print(self.impedance_buffered_values)
-        if(np.absolute(self.impedance_buffered_values[-1] - self.impedance_buffered_values[0]) > 75):
-            self.average_first = sum(self.impedance_buffered_values)/len(self.impedance_buffered_values)
-            print("first average", self.average_first)
-            self.buffer_flush()
-            self.embryo_monitoring_bool = True
-        if self.embryo_monitoring_bool == True:
-            self.embryo_reading_counter += 1
-        if(self.embryo_reading_counter == 4):
             print(self.impedance_buffered_values)
-            print(len(self.impedance_buffered_values))
-            self.average_second = sum(self.impedance_buffered_values) / len(self.impedance_buffered_values)
-            print("second average", self.average_second)
-            print("average difference", np.absolute(self.average_second - self.average_first))
-            print("time", spreadsheet["TIME"][self.count])
-            if np.absolute(self.average_second - self.average_first) > 70:
-                print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
-                print("I had an embryo event")
-                print("current impedance",self.impedance_current_value)
-                print("count", self.count)
-                print("time",spreadsheet["TIME"][self.count])
-                print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
-            self.embryo_reading_counter = 0
-            self.embryo_monitoring_bool = False
+            if(np.absolute(self.impedance_buffered_values[-1] - self.impedance_buffered_values[0]) > 75):
+                self.average_first = sum(self.impedance_buffered_values)/len(self.impedance_buffered_values)
+                print("first average", self.average_first)
+                self.buffer_flush()
+                self.embryo_monitoring_bool = True
+            if self.embryo_monitoring_bool == True:
+                self.embryo_reading_counter += 1
+                print(self.impedance_buffered_values)
+            if(self.embryo_reading_counter == 4):
+                self.average_second = sum(self.impedance_buffered_values) / len(self.impedance_buffered_values)
+                print("second average", self.average_second)
+                print("average difference", np.absolute(self.average_second - self.average_first))
+                print("time", spreadsheet["TIME"][self.count])
+                if np.absolute(self.average_second - self.average_first) > 70:
+                    print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+                    print("I had an embryo event")
+                    print("current impedance",self.impedance_current_value)
+                    print("count", self.count)
+                    print("time",spreadsheet["TIME"][self.count])
+                    print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+                self.embryo_reading_counter = 0
+                self.embryo_monitoring_bool = False
 
     def buffer_flush(self):
         self.impedance_buffered_values = []
